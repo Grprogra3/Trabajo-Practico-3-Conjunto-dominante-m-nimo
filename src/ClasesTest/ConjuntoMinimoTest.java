@@ -55,6 +55,8 @@ public class ConjuntoMinimoTest {
 
     @Test
     public void validarPropiedadConjuntoDominante() {
+        // Reemplazar con la inicialización de tu grafo donde el algoritmo da 6 en vez de 4
+
 
         Set<Vertice> resultado = g.ConjuntoDominanteMinimo().getVertices();
 
