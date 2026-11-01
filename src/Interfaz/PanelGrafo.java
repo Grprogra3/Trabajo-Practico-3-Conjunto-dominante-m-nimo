@@ -23,7 +23,7 @@ public class PanelGrafo extends JPanel {
     private static final long serialVersionUID = 1L;
     private static final int RADIO = 20;
     private static final int MARGEN = 40;
-
+    Dimension dimensionFija = new Dimension(1024, 768);
     private static final Color COLOR_ARISTA = new Color(70, 70, 90);
     private static final Color COLOR_VERTICE = new Color(52, 128, 172);
     private static final Color COLOR_RESALTADO = new Color(230, 120, 40);
@@ -39,6 +39,9 @@ public class PanelGrafo extends JPanel {
         this.grafo = grafo;
         setOpaque(false);
         ubicarEnCirculo();
+        setPreferredSize(dimensionFija);
+        setMinimumSize(dimensionFija);
+        setMaximumSize(dimensionFija);
 
         MouseAdapter mouse = new MouseAdapter() {
             @Override
