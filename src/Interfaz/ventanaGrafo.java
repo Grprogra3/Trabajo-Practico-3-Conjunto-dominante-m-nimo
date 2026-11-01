@@ -1,88 +1,98 @@
 package Interfaz;
 
+import Grafo.Grafo;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class ventanaGrafo extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
-	private ventanaPrincipal ventanaPrincipal;
-	private boolean mostrarRegiones;
+	private static final String RUTA_FONDO = "/Interfaz/imagenes/fondo.jpg";
 
-	
-	//para mostrar grafo original y agm
-	public ventanaGrafo( ventanaPrincipal ventanaPrincipal) {
+	private final ventanaPrincipal ventanaPrincipal;
+	private final Grafo grafo;
+	private PanelGrafo panelGrafo;
+	private BufferedImage imagenFondo;
 
-	    this.ventanaPrincipal = ventanaPrincipal;
-	    this.mostrarRegiones = false;
-	    initialize();
+	public ventanaGrafo(ventanaPrincipal ventanaPrincipal, Grafo grafo) {
+		this.ventanaPrincipal = ventanaPrincipal;
+		this.grafo = grafo;
+		initialize();
 	}
-	
-	//para mostrar grafo de las regiones obtenidas
-	public ventanaGrafo( int k) {
 
-
-        this.mostrarRegiones = true;
-        initialize();
-	}
-	
 	public void initialize() {
+		setTitle("Visualización del grafo");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 676, 571);
-		contentPane = new JPanel();
-		contentPane.setBackground(new Color(0, 0, 0));
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setBounds(100, 100, 760, 640);
+		imagenFondo = cargarImagen(RUTA_FONDO);
+
+		JPanel contentPane = new JPanel(new BorderLayout(0, 10)) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				if (imagenFondo != null) g.drawImage(imagenFondo, 0, 0, null);
+			}
+		};
+		contentPane.setBackground(Color.WHITE);
+		contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
-		
-		JLabel lblTitulo = new JLabel(mostrarRegiones ? "GRAFO REGIONALIZADO" : "MAPA PRINCIPAL");
-		lblTitulo.setBounds(167, 11, 302, 25);
-		lblTitulo.setForeground(Color.WHITE);
-		lblTitulo.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-		contentPane.add(lblTitulo);
-		
-		JTextArea areaSimilaridades = new JTextArea();
 
-		areaSimilaridades.setEditable(false);
-		areaSimilaridades.setBackground(Color.BLACK);
-		areaSimilaridades.setForeground(Color.WHITE);
-		areaSimilaridades.setFont(new Font("Monospaced", Font.PLAIN, 13));
-		areaSimilaridades.setLineWrap(false);
+		JLabel lblTitulo = new JLabel("GRAFO (" + grafo.getVertices().size() + " vértices, "
+				+ grafo.getAristas().size() + " aristas)", SwingConstants.CENTER);
+		lblTitulo.setForeground(Color.BLACK);
+		lblTitulo.setFont(new Font("Tahoma", Font.BOLD, 18));
+		contentPane.add(lblTitulo, BorderLayout.NORTH);
 
-		JScrollPane scroll = new JScrollPane(areaSimilaridades);
-		scroll.setBounds(31, 47, 587, 290);
-		contentPane.add(scroll);
+		panelGrafo = new PanelGrafo(grafo);
+		contentPane.add(panelGrafo, BorderLayout.CENTER);
 
-	
-			JButton btnAGM = new JButton("OBTENER ARBOL GENERADOR MÍNIMO");
-			btnAGM.addActionListener(new ActionListener() {
-			    public void actionPerformed(ActionEvent e) {		    	
-			    	// Si el botón dice VOLVER ATRÁS, vuelvo a la principal
-			        if (btnAGM.getText().equals("VOLVER PARA OBTENER REGIONES")) {
-			        	ventanaGrafo.this.dispose();
-			            ventanaPrincipal.setVisible(true);
-			            ventanaPrincipal.toFront();		    
-			            return;
-			        }
-			        // Si el botón dicen OBTENER AGM
-			        try {
+		JPanel botones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+		botones.setOpaque(false);
 
-			        } catch (IllegalArgumentException ex) {
-			            JOptionPane.showMessageDialog(ventanaGrafo.this, ex.getMessage());
-			            return;
-			        }
-			        lblTitulo.setText("ÁRBOL GENERADOR MÍNIMO");
-			        //cambio el texto del botón una vez mostrado el agm
-			        btnAGM.setText("VOLVER PARA OBTENER REGIONES");
-			    }
-			});		
-			btnAGM.setBounds(189, 354, 280, 23);
-			contentPane.add(btnAGM);	
+		JButton btnDominante = new JButton("CALCULAR CONJUNTO DOMINANTE");
+		btnDominante.addActionListener(e -> {
+			try {
+				Grafo dominante = grafo.ConjuntoDominanteMinimo();
+				panelGrafo.setResaltados(dominante.getVertices());
+				lblTitulo.setText("CONJUNTO DOMINANTE: " + dominante.getVertices().size() + " vértices");
+			} catch (RuntimeException ex) {
+				JOptionPane.showMessageDialog(this, "No se pudo calcular: " + ex.getMessage());
+			}
+		});
+		botones.add(btnDominante);
+
+		JButton btnVolver = new JButton("VOLVER");
+		btnVolver.addActionListener(e -> dispose());
+		botones.add(btnVolver);
+
+		contentPane.add(botones, BorderLayout.SOUTH);
+
+		// al cerrar (por botón o por la X) vuelvo a la ventana principal
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				ventanaPrincipal.setVisible(true);
+				ventanaPrincipal.toFront();
+			}
+		});
+	}
+
+	private BufferedImage cargarImagen(String ruta) {
+		try (InputStream is = getClass().getResourceAsStream(ruta)) {
+			return (is == null) ? null : ImageIO.read(is);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
 		}
-	}		
+	}
+}

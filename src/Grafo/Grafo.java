@@ -28,6 +28,9 @@ public class Grafo {
     public Set<Vertice> getVertices() { return Set.copyOf(vertices.values());  }
     public List<Arista> getAristas() { return Collections.unmodifiableList(aristas); }
 
+    // devuelve el vertice del grafo con ese valor, o null si no existe
+    public Vertice getVertice(int valor) { return vertices.get(valor); }
+
     public Set<Vertice> getVecinos(Vertice v) {
         verificarExiste(v);
         return v.getVecinos();
@@ -102,7 +105,8 @@ return conjuntoD;
 
         @Override
         public int compareTo(Candidato o) {
-            return Integer.compare(this.gananciaEstimada,o.gananciaEstimada);
+            // orden inverso: la PriorityQueue devuelve primero el de MAYOR ganancia
+            return Integer.compare(o.gananciaEstimada, this.gananciaEstimada);
         }
     }
 
