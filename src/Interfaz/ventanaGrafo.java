@@ -1,6 +1,8 @@
 package Interfaz;
 
+import Grafo.ControladorGrafo;
 import Grafo.Grafo;
+import Grafo.Vertice;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -11,6 +13,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 
 public class ventanaGrafo extends JFrame {
 
@@ -18,13 +21,13 @@ public class ventanaGrafo extends JFrame {
 	private static final String RUTA_FONDO = "/Interfaz/imagenes/fondo.jpg";
 
 	private final ventanaPrincipal ventanaPrincipal;
-	private final Grafo grafo;
+	private final ControladorGrafo controlador;
 	private PanelGrafo panelGrafo;
 	private BufferedImage imagenFondo;
 
-	public ventanaGrafo(ventanaPrincipal ventanaPrincipal, Grafo grafo) {
+	public ventanaGrafo(ventanaPrincipal ventanaPrincipal, ControladorGrafo controlador) {
 		this.ventanaPrincipal = ventanaPrincipal;
-		this.grafo = grafo;
+		this.controlador = controlador;
 		initialize();
 	}
 
@@ -47,13 +50,13 @@ public class ventanaGrafo extends JFrame {
 		contentPane.setBorder(new EmptyBorder(10, 10, 10, 10));
 		setContentPane(contentPane);
 
-		JLabel lblTitulo = new JLabel("GRAFO (" + grafo.getVertices().size() + " vértices, "
-				+ grafo.getAristas().size() + " aristas)", SwingConstants.CENTER);
+		JLabel lblTitulo = new JLabel("GRAFO (" + controlador.getCantidadVertices() + " vértices, "
+				+ controlador.getCantidadAristas() + " aristas)", SwingConstants.CENTER);
 		lblTitulo.setForeground(Color.BLACK);
 		lblTitulo.setFont(new Font("Tahoma", Font.BOLD, 18));
 		contentPane.add(lblTitulo, BorderLayout.NORTH);
 
-		panelGrafo = new PanelGrafo(grafo);
+		panelGrafo = new PanelGrafo(controlador.getGrafo());
 		contentPane.add(panelGrafo, BorderLayout.CENTER);
 
 		JPanel botones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
@@ -62,13 +65,13 @@ public class ventanaGrafo extends JFrame {
 		JButton btnDominante = new JButton("CALCULAR CONJUNTO DOMINANTE");
 		btnDominante.addActionListener(e -> {
 			try {
-				Grafo dominante = grafo.ConjuntoDominanteMinimo();
-				panelGrafo.setResaltados(dominante.getVertices());
-				lblTitulo.setText("CONJUNTO DOMINANTE: " + dominante.getVertices().size() + " vértices");
-			} catch (RuntimeException ex) {
-				JOptionPane.showMessageDialog(this, "No se pudo calcular: " + ex.getMessage());
-			}
-		});
+	            Set<Vertice> dominantes = controlador.calcularConjuntoDominante(); // Redirección al puente
+	            panelGrafo.setResaltados(dominantes);
+	            lblTitulo.setText("CONJUNTO DOMINANTE: " + dominantes.size() + " vértices");
+	        } catch (RuntimeException ex) {
+	            JOptionPane.showMessageDialog(this, "No se pudo calcular: " + ex.getMessage());
+	        }
+	    });
 		botones.add(btnDominante);
 
 		JButton btnVolver = new JButton("VOLVER");

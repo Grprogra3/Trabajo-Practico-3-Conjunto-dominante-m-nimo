@@ -11,6 +11,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
+import Grafo.ControladorGrafo;
 import Grafo.Grafo;
 import Grafo.Vertice;
 import Persistencia.GrafoJSON;
@@ -28,7 +29,8 @@ public class ventanaPrincipal extends JFrame {
 	// Ruta (dentro del classpath) de la imagen de fondo: src/Interfaz/imagenes/fondo.png
 	private static final String RUTA_FONDO = "/Interfaz/imagenes/fondo.jpg";
 	private BufferedImage imagenFondo;
-	private Grafo grafo = new Grafo();
+	//private Grafo grafo = new Grafo();
+	private ControladorGrafo controlador = new ControladorGrafo();
 
 
 	public static void main(String[] args) {
@@ -116,7 +118,7 @@ public class ventanaPrincipal extends JFrame {
                  }
                  try {
                      int valor = Integer.parseInt(nombre);
-                     grafo.agregarVertice(new Vertice(valor));
+                     controlador.agregarVertice(valor);
 
                      comboBox1.addItem(nombre);
                      comboBox2.addItem(nombre);
@@ -218,11 +220,11 @@ public class ventanaPrincipal extends JFrame {
 
 	 
 	 private void mostrarGrafo() {
-		 if (grafo.getVertices().isEmpty()) {
+		 if (controlador.estaVacio()) {
 			 JOptionPane.showMessageDialog(this, "El grafo está vacío. Creá vértices o cargá un JSON.");
 			 return;
 		 }
-		 new ventanaGrafo(this, grafo).setVisible(true);
+		 new ventanaGrafo(this, controlador).setVisible(true);
 		 this.setVisible(false);
 	}
 
@@ -238,9 +240,9 @@ public class ventanaPrincipal extends JFrame {
 			 return;
 		 }
 		 try {
-			 Vertice a = grafo.getVertice(Integer.parseInt(sel1.toString()));
-			 Vertice b = grafo.getVertice(Integer.parseInt(sel2.toString()));
-			 grafo.agregarArista(a, b);
+			 int a = Integer.parseInt(sel1.toString());
+			 int b = Integer.parseInt(sel2.toString());
+			 controlador.agregarArista(a, b);
 			 JOptionPane.showMessageDialog(this, "Arista " + a + " - " + b + " creada correctamente.");
 		 } catch (IllegalArgumentException ex) {
 			 JOptionPane.showMessageDialog(this, ex.getMessage());
@@ -253,7 +255,7 @@ public class ventanaPrincipal extends JFrame {
 		 if (selector.showOpenDialog(this) != JFileChooser.APPROVE_OPTION) return;
 
 		 try {
-			 grafo = GrafoJSON.cargar(selector.getSelectedFile().toPath());
+			 controlador.cargarDesdeJSON(selector.getSelectedFile());
 		 } catch (IOException ex) {
 			 JOptionPane.showMessageDialog(this, "No se pudo leer el archivo: " + ex.getMessage());
 			 return;
@@ -265,16 +267,13 @@ public class ventanaPrincipal extends JFrame {
 		 // actualizo los combos con los vertices cargados
 		 comboBox1.removeAllItems();
 		 comboBox2.removeAllItems();
-		 grafo.getVertices().stream()
-				 .map(Vertice::getValor)
-				 .sorted()
-				 .forEach(v -> {
-					 comboBox1.addItem(String.valueOf(v));
-					 comboBox2.addItem(String.valueOf(v));
-				 });
+		 controlador.getValoresVerticesOrdenados().forEach(v -> {
+		        comboBox1.addItem(v);
+		        comboBox2.addItem(v);
+		    });
 
-		 JOptionPane.showMessageDialog(this, "Grafo cargado: " + grafo.getVertices().size()
-				 + " vértices y " + grafo.getAristas().size() + " aristas.");
+		 JOptionPane.showMessageDialog(this, "Grafo cargado: " + controlador.getCantidadVertices()
+				 + " vértices y " + controlador.getCantidadAristas() + " aristas.");
 	 }
 
 	public class EjemploFuente {

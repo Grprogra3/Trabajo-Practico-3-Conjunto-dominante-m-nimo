@@ -6,6 +6,7 @@ import Persistencia.GrafoJSON;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ControladorGrafo {
     private Grafo grafo;
@@ -47,6 +48,13 @@ public class ControladorGrafo {
         return grafo.getVertices().isEmpty();
     }
 
+    public java.util.List<String> getValoresVerticesOrdenados() {
+        return grafo.getVertices().stream()
+                .map(Vertice::getValor)
+                .sorted()
+                .map(String::valueOf)
+                .collect(Collectors.toList());
+    }
    
     public Set<Vertice> calcularConjuntoDominante() {
         Grafo dominante = grafo.ConjuntoDominanteMinimo();
