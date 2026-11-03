@@ -1,6 +1,7 @@
 package Persistencia;
 
 import Grafo.Grafo;
+
 import Grafo.Vertice;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -34,9 +35,9 @@ public final class GrafoJSON {
     }
 
     public static Grafo cargar(Path archivo) throws IOException {
-        DatosGrafo datos;
+    	DatosGrafo datos;
         try (Reader lector = Files.newBufferedReader(archivo, StandardCharsets.UTF_8)) {
-            datos = new Gson().fromJson(lector, DatosGrafo.class);
+            datos = new Gson().fromJson(lector, DatosGrafo.class); 
         } catch (JsonParseException e) {
             throw new IllegalArgumentException("El archivo no es un JSON válido: " + e.getMessage(), e);
         }
